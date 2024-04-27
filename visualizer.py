@@ -7,6 +7,48 @@ class Visualizer:
     def __init__(self, dataframe):
         self.df = dataframe
 
+    def max_calls_per_client_vis(self):
+        # Ensure the datetime format is correct
+        self.df['ΗΜΕΡΟΜΗΝΙΑ & ΩΡΑ'] = pd.to_datetime(self.df['ΗΜΕΡΟΜΗΝΙΑ & ΩΡΑ'], dayfirst=True)
+
+        # Group by client number and count the number of calls for each client
+        client_calls = self.df.groupby('ΚΛΗΘΕΙΣ ΑΡΙΘΜΟΣ').size()
+
+        # Divide the clients into two groups
+        calls_up_to_100 = client_calls[client_calls <= 100]
+        calls_above_100 = client_calls[client_calls > 100]
+
+        # Plot for clients with up to 100 calls
+        plt.figure(figsize=(15, 8))
+        barplot_100 = sns.barplot(x=calls_up_to_100.index, y=calls_up_to_100.values, palette='BuPu')
+        plt.title('Σύνολο Κλήσεων ανά πελάτη(0-100 Κλήσεις)')
+        plt.xlabel('Αριθμός Πελάτη')
+        plt.ylabel('Σύνολο Κλήσεων')
+        self.annotate_bars(barplot_100)
+        plt.xticks(rotation=90)
+        plt.tight_layout()
+        plt.show()
+
+        # Plot for clients with more than 100 calls
+        plt.figure(figsize=(15, 8))
+        barplot_101 = sns.barplot(x=calls_above_100.index, y=calls_above_100.values, palette='BuPu')
+        plt.title('Σύνολο Κλήσεων ανά πελάτη(100+ Κλήσεις)')
+        plt.xlabel('Αριθμός Πελάτη')
+        plt.ylabel('Σύνολο Κλήσεων')
+        self.annotate_bars(barplot_101)
+        plt.xticks(rotation=90)
+        plt.tight_layout()
+        plt.show()
+
+    def annotate_bars(self, barplot):
+        for p in barplot.patches:
+            barplot.annotate(format(p.get_height(), '.1f'), 
+                             (p.get_x() + p.get_width() / 2., p.get_height()), 
+                             ha = 'center', va = 'center', 
+                             xytext = (0, 9), 
+                             textcoords = 'offset points')
+
+
     def call_times_vis(self):
         # Ensure the datetime column is in the correct datetime format
         self.df['ΗΜΕΡΟΜΗΝΙΑ & ΩΡΑ'] = pd.to_datetime(self.df['ΗΜΕΡΟΜΗΝΙΑ & ΩΡΑ'], dayfirst=True)
